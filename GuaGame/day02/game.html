@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>game-1</title>
+	<style type="text/css">
+		#canvas{
+			border: 1px solid black;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="500" height="300"></canvas>
+	<div>
+		<input id="sinput" type="range" min="1" max="100" value="50"/>
+	</div>
+<script src="utils.js"></script>
+<script src="guagame.js"></script>
+<script src="paddle.js"></script>
+<script src="ball.js"></script>
+<script src="block.js"></script>
+<script src="levels.js"></script>
+<script>
+ 	
+	function __main(){
+		var game = GuaGame()
+		var paddle = Paddle()
+		var ball = Ball()
+		var blocks = []
+		// for (var i = 0; i < 3; i++) {
+		// 	var b = Block()
+		// 	b.x = 50+i*150
+		// 	b.y = 50
+		// 	blocks.push(b)
+		// }
+
+		game.registerAction('a',function(){
+			paddle.moveLeft()
+		})
+		game.registerAction('d',function(){
+			paddle.moveRight(game.canvas)
+		})
+		game.registerAction('f',function(){
+			ball.fire()
+		})
+		window.addEventListener('keydown',function(event){
+			var k = event.key
+			if(k == 'p'){
+				game.paused = !game.paused
+			}else if("123456789".includes(k)){
+				blocks = loadLevels(parseInt(k))
+			}
+		},false)
+		document.querySelector('#sinput').addEventListener('input',function(event){
+			game.fps = parseInt(sinput.value)
+		},false)
+
+
+		game.update = function(){
+			if(game.paused){
+				return
+			}
+			if(isCollided(paddle,ball)){
+				log('paddle ball collided')
+				ball.rebound()
+			}
+			ball.move(game.canvas)
+
+			blocks.forEach(function(block){
+				if(block.collide(ball)){
+					log('ball block collided')
+					ball.rebound()
+					block.die()
+				}
+			})
+
+		}
+		game.draw = function(){
+			game.drawImage(paddle)
+			game.drawImage(ball)
+			blocks.forEach(function(block){
+				if(block.alive){
+					game.drawImage(block)
+				}
+			})
+		}
+		game.start()
+
+	}
+	__main()
+	
+</script>
+</body>
+</html>
